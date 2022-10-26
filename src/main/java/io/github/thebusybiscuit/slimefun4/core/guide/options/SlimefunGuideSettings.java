@@ -137,13 +137,13 @@ public final class SlimefunGuideSettings {
            "&7&o如果你想让这个项目持续下去",
            "&7&o你可以考虑对项目做出贡献",
            "",
-           "&7\u21E8 &e点击前往汉化版 GitHub 仓库"
+           "&7\u21E8 &e点击前往汉化随缘修BUG版 GitHub 仓库"
         ));
         // @formatter:on
 
         menu.addMenuClickHandler(6, (pl, slot, item, action) -> {
             pl.closeInventory();
-            ChatUtils.sendURL(pl, "https://github.com/StarwishSama/Slimefun4");
+            ChatUtils.sendURL(pl, "https://github.com/HerbertBin/Slimefun4-on-Arclight");
             return false;
         });
 
@@ -201,7 +201,7 @@ public final class SlimefunGuideSettings {
 
             menu.addMenuClickHandler(49, (pl, slot, item, action) -> {
                 pl.closeInventory();
-                ChatUtils.sendURL(pl, "https://github.com/StarWishsama/Slimefun4/issues");
+                ChatUtils.sendURL(pl, "https://github.com/HerbertBin/Slimefun4-on-Arclight/issues");
                 return false;
             });
         } else {

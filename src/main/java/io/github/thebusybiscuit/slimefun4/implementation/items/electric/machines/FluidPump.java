@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -151,14 +152,10 @@ public class FluidPump extends SimpleSlimefunItem<BlockTicker> implements Invent
                         return;
                     }
 
-                    Block nextFluid = findNextFluid(fluid);
-
-                    if (nextFluid != null) {
-                        removeCharge(b.getLocation(), ENERGY_CONSUMPTION);
-                        menu.consumeItem(slot);
-                        menu.pushItem(bucket, getOutputSlots());
-                        nextFluid.setType(Material.AIR);
-                    }
+                    removeCharge(b.getLocation(), ENERGY_CONSUMPTION);
+                    menu.consumeItem(slot);
+                    menu.pushItem(bucket, getOutputSlots());
+                    fluid.setType(Material.AIR);
 
                     return;
                 } else if (SlimefunUtils.isItemSimilar(itemInSlot, emptyBottle, true, false)) {
@@ -168,48 +165,18 @@ public class FluidPump extends SimpleSlimefunItem<BlockTicker> implements Invent
                         return;
                     }
 
-                    Block nextFluid = findNextFluid(fluid);
+                    removeCharge(b.getLocation(), ENERGY_CONSUMPTION);
+                    menu.consumeItem(slot);
+                    menu.pushItem(bottle, getOutputSlots());
 
-                    if (nextFluid != null) {
-                        removeCharge(b.getLocation(), ENERGY_CONSUMPTION);
-                        menu.consumeItem(slot);
-                        menu.pushItem(bottle, getOutputSlots());
-
-                        if (ThreadLocalRandom.current().nextInt(100) < 30) {
-                            nextFluid.setType(Material.AIR);
-                        }
+                    if (ThreadLocalRandom.current().nextInt(100) < 30) {
+                        fluid.setType(Material.AIR);
                     }
 
                     return;
                 }
             }
         }
-    }
-
-    @Nullable
-    private Block findNextFluid(@Nonnull Block fluid) {
-        if (fluid.getType() == Material.WATER || fluid.getType() == Material.BUBBLE_COLUMN) {
-            /**
-             * With water we can be sure to find an infinite source whenever we
-             * go further than a block, so we can just remove the water here and
-             * save ourselves all of that computing...
-             */
-            if (isSource(fluid)) {
-                return fluid;
-            }
-        } else if (fluid.getType() == Material.LAVA) {
-            List<Block> list = Vein.find(fluid, RANGE, block -> block.getType() == fluid.getType());
-
-            for (int i = list.size() - 1; i >= 0; i--) {
-                Block block = list.get(i);
-
-                if (isSource(block)) {
-                    return block;
-                }
-            }
-        }
-
-        return null;
     }
 
     private @Nonnull ItemStack getFilledBottle(@Nonnull Block fluid) {
@@ -246,6 +213,7 @@ public class FluidPump extends SimpleSlimefunItem<BlockTicker> implements Invent
      * @return Whether that {@link Block} is a liquid and a source {@link Block}.
      */
     private boolean isSource(@Nonnull Block block) {
+
         if (block.isLiquid()) {
             BlockData data = block.getBlockData();
 
