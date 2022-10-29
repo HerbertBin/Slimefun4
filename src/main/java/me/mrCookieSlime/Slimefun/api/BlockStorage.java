@@ -240,7 +240,6 @@ public class BlockStorage {
         for (String file : fileall) {
             //Slimefun.logger().log(Level.INFO, "Loading stored-inventories: {0}", file);
             if (file.endsWith(".sfi")) {
-                Slimefun.logger().log(Level.INFO, "Load");
                 try {
                     Location l = deserializeLocation(file.replace(".sfi", ""));
 
