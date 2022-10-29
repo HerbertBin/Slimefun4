@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.sql.Array;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -89,14 +87,16 @@ public class BlockStorage {
     }
 
     private static Location deserializeLocation(String l) {
+        String data = l;
+        if (l.indexOf(PATH_INVENTORIES) != -1) {
+            data = l.substring(PATH_INVENTORIES.length());
+        }
         try {
-            String[] components = CommonPatterns.SEMICOLON.split(l);
+            String[] components = CommonPatterns.SEMICOLON.split(data);
             if (components.length != 4) {
                 return null;
             }
-
             World w = Bukkit.getWorld(components[0]);
-
             if (w != null) {
                 return new Location(w, Integer.parseInt(components[1]), Integer.parseInt(components[2]), Integer.parseInt(components[3]));
             }
@@ -234,10 +234,15 @@ public class BlockStorage {
     }
 
     private void loadInventories() {
-        for (File file : new File("data-storage/Slimefun/stored-inventories").listFiles()) {
-            if (file.getName().startsWith(world.getName()) && file.getName().endsWith(".sfi")) {
+        List<String> filelist = listAllFiles("data-storage/Slimefun/stored-inventories");
+        String[] fileall = new String[filelist.size()];
+        filelist.toArray(fileall);
+        for (String file : fileall) {
+            //Slimefun.logger().log(Level.INFO, "Loading stored-inventories: {0}", file);
+            if (file.endsWith(".sfi")) {
+                Slimefun.logger().log(Level.INFO, "Load");
                 try {
-                    Location l = deserializeLocation(file.getName().replace(".sfi", ""));
+                    Location l = deserializeLocation(file.replace(".sfi", ""));
 
                     // We only want to only load this world's menus
                     if (world != l.getWorld()) {
@@ -255,7 +260,7 @@ public class BlockStorage {
                         inventories.put(l, new BlockMenu(preset, l, cfg));
                     }
                 } catch (Exception x) {
-                    Slimefun.logger().log(Level.SEVERE, x, () -> "An Error occurred while loading this Block Inventory: " + file.getName());
+                    Slimefun.logger().log(Level.SEVERE, x, () -> "An Error occurred while loading this Block Inventory: " + file);
                 }
             }
         }
@@ -280,6 +285,27 @@ public class BlockStorage {
                 }
             }
         }
+    }
+
+    public List<String> listAllFiles(String file) {
+        File thislist[] = new File(file).listFiles();
+        if (thislist == null || thislist.length == 0) {
+            return null;
+        }
+        List<String> ret = new ArrayList<String>();
+        List<String> sublist;
+        int n = thislist.length;
+        for (File f : thislist) {
+            if (f.isDirectory()) {
+                sublist = listAllFiles(file + "/" + f.getName());
+                if (sublist != null) {
+                    ret.addAll(sublist);
+                }
+            }else {
+                ret.add(file + "/" + f.getName());
+            }
+        }
+        return ret;
     }
 
     public void computeChanges() {
